@@ -7,14 +7,22 @@ task_manager = TaskManager()
 # 1. Add config fiile to > lm_eval/tasks/{your_taskname}/{task_config.yaml} 
 # 2. TaskManager(include_path='lm_eval/tasks/{your_taskname}/')
 
+# TODO: @suhyun check the task list to train
 task_list = ["hellaswag", "gsm8k", "openbookqa", "arc_easy", "arc_challenge", "piqa", "winogrande", "commonsense_qa"]
 
 output_dir = "./data/train"
+# Output will be 
+# Sample : {output_dir}/samples/{task_name}-sample1.jsonl
+# Dataset : {output_dir}/{task_name}.jsonl 
+
 os.makedirs(output_dir, exist_ok=True)
 os.makedirs(output_dir+'/samples', exist_ok=True)
 
 tasks = task_manager.load_task_or_group(task_list)
 print(f'task_list   : {task_list}')
+
+# To get the eval dataset set this as False
+extract_train_data = True 
 
 for tname, tobj in tasks.items():
     tobj.build_all_requests()
