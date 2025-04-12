@@ -25,7 +25,7 @@ print(f'task_list   : {task_list}')
 extract_train_data = True 
 
 for tname, tobj in tasks.items():
-    tobj.build_all_requests()
+    tobj.build_all_requests(training=extract_train_data)
     instances = tobj.instances
     
     print(f'tname : {tname} | len : {len(instances)} ==========================') 
