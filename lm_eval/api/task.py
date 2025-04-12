@@ -394,6 +394,7 @@ class Task(abc.ABC):
         fewshot_as_multiturn: bool = False,
         chat_template: Optional[Callable] = None,
         tokenizer_name: str = "",
+        training: bool = False,
     ) -> None:
         """Build a set of Instances for a task, and store them in task.instances"""
 
@@ -438,7 +439,7 @@ class Task(abc.ABC):
 
         doc_id_docs = list(
             self.doc_iterator(
-                rank=rank, limit=limit, samples=samples, world_size=world_size
+                rank=rank, limit=limit, samples=samples, world_size=world_size, training=training
             )
         )
 
@@ -692,7 +693,8 @@ class Task(abc.ABC):
         rank: int = 0,
         limit: Union[int, None] = None,
         world_size: int = 1,
-        samples: Optional[List[int]] = None,
+        samples: Optional[List[int]] = None, 
+        training: bool = False
     ) -> Iterator[Tuple[int, Any]]:
         if samples:
             n = len(self.eval_docs)
@@ -709,9 +711,18 @@ class Task(abc.ABC):
                 world_size=int(world_size),
             )
         else:
+            if training :
+                if not self.has_training_docs():
+                    raise ValueError(
+                        "Training docs are not available for this task. Please set training=False."
+                    )
+                doc_to_iter = self.training_docs()
+            else :
+                doc_to_iter = self.eval_docs 
+                
             limit = int(limit) if limit else None
             doc_iterator = utils.create_iterator(
-                enumerate(self.eval_docs),
+                enumerate(doc_to_iter),
                 rank=int(rank),
                 limit=limit,
                 world_size=int(world_size),
